@@ -1,0 +1,240 @@
+AWS: 
+Pick a Prod Region, DR region => ap-south-1
+Pick a Instance type 
+ - prod        -> c4.2xlarge (8)
+ - dev         -> t3.medium (3-6)
+ - QA          -> t3.medium (3-6)
+ - UAT         -> t3.medium (3-6)
+
+
+Prod/Dr strategies:
+https://aws.amazon.com/blogs/architecture/disaster-recovery-dr-architecture-on-aws-part-i-strategies-for-recovery-in-the-cloud/
+RTO - acceptable service DownTime
+RPO - acceptable Data Loss
+
+Primary Services: VPC,RDS,LB,EC2,ASG,S3,CF,R53,ACM,EBS,EFS,Lambda
+Supporing Services: CloudWatch,CloudTrail,SNS,Code Deploy,Code Pipeline,Cloud Formation
+Rare Servces: SQS,ElasticbeanStalk
+
+
+EC2:
+What happens if your pem key is lost ? how do you retrieve back ?
+ - AMI Backup
+ - detach root volume -> attach root volume to temp instance -> change the pem key .shh/authorised_keys -> re-attach back EBS SSD to orginal instance
+ - Instance Connect ?
+CPU credits ?
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-credits-baseline-concepts.html
+How do you add a volume to your EC2 ? (Windows/Linux)
+how do you permanentaly add a volume to your EC2 ?
+ - add entry in /etc/fstab
+can we shrink a volume ?, but how do we achieve it ?
+ - NO !, copy & paste to a new volume
+AMI vs Snaphot vs instance vs EBS Volume ?
+EBS volume types ?
+ - SSD
+ - HDD
+ - Magnetic tapes
+Can we use the AMI from one region to another ?
+ - NO, copy/transfer to different region
+Ec2 types based on pricing ?
+ - ON-DEMAND
+ - Free-tier
+ - Spot (Aution/bidding)
+ - dedicated
+ - reserved
+EC2 instance types ?
+ - general purpose   (CPU 1:1 Memory) (4cpu:16Gb memory) (2cpu:8 Gbmemory)
+ - compute optimised (CPU 2:1 Memory) (8CPU:8Gb memory) c4.xlarge
+ - memory optimised  (CPU 1:2 Memory) (4cpu:64GB memory)
+ - storage optimised 
+ - Accelerated Computing
+
+
+Load Balancer & ASG:
+ALB vs NLB vs ELB ?
+Sticky session ? How session is maintained in LB ?
+Stateful & Stateless application ?
+ - Stateful => if the user information is stored in your server it is statefull application
+ - Stateless => if the user information is not stored in your server it is stateless application
+IN ASG what is min, desired & maximum ?
+ - min 1 => (it will have Instace scale in protection servers & AWS will always try to achive min 1st it forwards to Desired)
+ - desired 3 => (AWS will try to achieve)
+ - max 5 => (When your load is incresed based on the cpu/mem)
+which ec2 instance will be terminated when load is normal ?
+ - Scale in policy, Scale out policy, Instace scale-in protection
+Launch Configuration vs Launch Template ?
+What are the types of scaling available 
+ - Horizontal (ASG) - increase the number of instance
+ - Vertical (NO) - increases the power of cpu & Ram
+Increase/Change my instance types without downtime ?
+ - AMI Backup & Launch a new instance
+ - Instance refresh in ASG
+
+
+IAM:
+What is ARN ?
+User/Group vs Role vs Policy ?
+Check out Json code for a policy ?
+Inline Policy, AWS managed policy, Customer Managed Policy
+Can we give a access with Time restriction ?
+ - with condition in json
+Permission Boundry ?
+
+S3:
+EC2 - S3 bucket without internet access ?
+ - it will go via internet !
+ - VPC ENDPOINTS 
+   - Gateway Endpoint (AWS - s3)
+   - Interface Endpoint
+how can we access s3 bucket from one account to another account ?
+ - https://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html
+Storage classes ?
+ - https://aws.amazon.com/s3/storage-classes/
+Can we host a website using s3 ? but can you make it as https ?
+ - Route 53 -> CloudFront (ACM cert) -> S3
+What are the types of encryption in S3 ? 
+ - https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingEncryption.html
+What is lifecyle policy in S3 ?
+What is ACL vs Bucket policy ?
+How to take backup of s3 ? / have replica of s3 ?
+ - https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-2.html
+
+
+VPC:
+What is public subnet vs private subnet ?
+What is internet gateway vs natgateway ?
+What is nat-instance vs natgateway ?
+What is CIDR ?
+/29 => 32 - 29 => 2*3 => 8
+ - /24 =>  256
+ - /16 =>  65536 
+What are the Ips you will get when you create a subnet ?
+ - https://www.davidc.net/sites/default/subnets/subnets.html
+What are the 5 Ip’s Reserved by the Subnet ? 
+Minimum Subnet Range ?
+ /28 (16 ips)
+Maximum Subnet Range ?
+ /16 (65536 ips)
+maximum subnets per vpc ?
+ 200
+VPC peering ? vs Transit Gateway ?
+ - one to one vpc peering
+ - for 6 VPCs go for Transit Gateway
+Security Groups vs NACL ?
+What do you block a IP in AWS ? 
+ - NACL
+VPC flow logs ?
+
+R53:
+What is a Hosted zone in R53 ?
+what are the record types ?
+ - A
+ - AAAA
+ - CNAME
+ - SOA
+ - NS
+ - MX 
+what are the routing policy ? / What is the new latency policy which got introduced ?
+
+RDS:
+Multi-AZ deployments vs Read replicas vs Multi-Region deployments ?
+What is an advantage of aurora RDS ?
+What is parametrised group, Options group, Subnet group in RDS ?
+RDS vs Dynamodb vs redshift ?
+
+CloudWatch & CloudTrail:
+CloudTrail vs CloudWatch ?
+What are the metrices you are monitoring thourgh Cloud Watch ?
+ - https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-monitoring.html
+How to do you send notification on a alarm ?
+ - SNS
+
+Lambda:
+What is Lambda / purpose of Lambda ?
+Max timout for a lambda functions ?
+ - 15 minutes
+
+EFS/ FSx: 
+ - EFS (Linux) Port no: 2049 (NFS)
+ - FSx (Windows)
+
+SNS:
+ - what is Topic ? (SNS - Email,Phone num)
+ - what is queue ? (SQS)
+ - what is function ? (Lambda)
+ - what is stack ? (CloudFormation)
+
+Cloud Formation:
+ - We are using Terraform. 
+What is a Stack ?
+What is a Stack vs StackSet ? 
+CloudFormation vs Terraform ?
+
+Cloud Front:
+what is CDN ? what do you do with CloudFront ?
+What is OAI in CloudFront ? - s3
+Can we attach SSL in CloudFront ?
+how do you delete or refresh cache ?
+ - Invalidations
+how do you restrict users based on Country in AWS ?
+ - Geo-Restriction CloudFront
+how to get a cert in ACM ?
+
+============================================
+
+Additional Servies:
+
+Code Commit
+Code Build
+code deploy
+Code Pipeline
+Code Star
+
+ECS
+EKS
+ECR
+
+Athena
+EMR
+Glue
+kinesis
+
+Cost Explorer
+Budgets
+Billing Calculator
+Trusted Advisor
+
+System Manger
+
+Elastic Bean Stalk
+AWS Outpost
+
+DynamoDB
+Elastic Cache
+RedShift
+
+WorkSpaces
+ControlTower
+AWS Organisations
+Service Catalog
+
+Step Functions
+
+API Gateway
+Traffic Manager
+Global Accelarator
+
+KMS
+Param Store
+
+SES
+
+AWS Backup
+
+SSO
+XRAY
+WAF & Shield
+Cognito
+Inspector 
+GaurdDuty
+Detective
